@@ -10,27 +10,43 @@
     </style>
 </head>
 <body>
-    <h1>🔥 트렌딩 밈 코인 정보 플랫폼</h1>
-    <p>여기에 파이썬이 긁어온 최신 밈 코인 데이터가 표시될 예정입니다.</p>
+    <h1>🔥 트렌딩 BNB 밈 코인 정보 플랫폼</h1>
+    <p>BNB Chain (PancakeSwap Factory)에서 조회한 유동성 풀 정보입니다.</p>
 
     <div id="coin-list" class="data-container">
-        로딩 중... (곧 여기에 코인 목록 테이블이 나타납니다.)
+        데이터 로딩 중...
     </div>
+
     <script>
-        // GitHub에 업로드된 JSON 파일의 경로를 지정합니다.
-        const DATA_URL = "fetched_coin_data.json";
+        // 파일 이름을 새롭게 생성된 JSON 파일 이름으로 변경
+        const DATA_URL = "bsc_meme_data.json"; 
 
         fetch(DATA_URL)
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
                 const container = document.getElementById('coin-list');
-                let htmlContent = '<table><thead><tr><th>코인 이름</th><th>가격 (USD)</th></tr></thead><tbody>';
+                if (data.length === 0) {
+                    container.innerHTML = '현재 표시할 데이터가 없습니다.';
+                    return;
+                }
+                
+                let htmlContent = '<table><thead><tr><th>#</th><th>코인 이름 (심볼)</th><th>체인</th><th>예상 24H 거래량</th><th>풀 주소</th></tr></thead><tbody>';
 
-                data.forEach(coin => {
+                data.forEach((coin, index) => {
+                    const formatUSD = (num) => num ? `$${new Intl.NumberFormat('en-US').format(num)}` : 'N/A';
+                    
                     htmlContent += `
                         <tr>
-                            <td>${coin.name}</td>
-                            <td>$${coin.price_usd}</td>
+                            <td>${index + 1}</td>
+                            <td><strong>${coin.name}</strong> (${coin.symbol})</td>
+                            <td>${coin.chain}</td>
+                            <td>${formatUSD(coin.estimated_24h_volume)}</td>
+                            <td>${coin.liquidity_pool_address.substring(0, 8)}...</td>
                         </tr>
                     `;
                 });
@@ -40,10 +56,8 @@
             })
             .catch(error => {
                 console.error('데이터 로드 오류:', error);
-                document.getElementById('coin-list').innerHTML = '데이터를 불러오는 데 실패했습니다.';
+                document.getElementById('coin-list').innerHTML = `데이터 로드 실패: ${error.message}`;
             });
     </script>
-</body>
-</html>
 </body>
 </html>
